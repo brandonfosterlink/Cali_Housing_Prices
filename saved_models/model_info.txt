@@ -1,0 +1,17 @@
+SVM Housing Price Prediction Model
+========================================
+
+Model Type: Support Vector Machine (PyTorch)
+Input Features: 8
+Feature Names: MedInc, HouseAge, AveRooms, AveBedrms, Population, AveOccup, Latitude, Longitude
+Epsilon: 0.1
+C (Regularization): 1.0
+Optimizer: Adam
+Learning Rate: 0.001
+Epochs: 100
+
+Performance Metrics:
+Training RMSE: 0.930358
+Training R²: 0.352498
+Test RMSE: 0.925785
+Test R²: 0.345946
