@@ -1,0 +1,29 @@
+Enhanced SVM Housing Price Prediction - Model Comparison
+============================================================
+
+Feature Engineering:
+- Original features: 8
+- Engineered features: 17
+- Polynomial degree: 2
+- Final features: 170
+
+Model Performance Comparison:
+----------------------------------------
+Linear:
+  Test RMSE: 0.6731
+  Test R²: 0.6542
+  Test MAE: 0.4291
+
+RBF:
+  Test RMSE: 0.6041
+  Test R²: 0.7216
+  Test MAE: 0.3978
+
+Polynomial:
+  Test RMSE: 2.2573
+  Test R²: -2.8883
+  Test MAE: 0.4971
+
+Best Model: RBF
+Best Test RMSE: 0.6041
+Best Test R²: 0.7216

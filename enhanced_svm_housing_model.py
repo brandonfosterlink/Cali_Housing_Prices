@@ -78,8 +78,8 @@ df['Distance_to_Ocean'] = df['Longitude'] * df['Latitude']  # Distance proxy
 df['Coastal_Area'] = (df['Longitude'] > -118.5).astype(int)  # Binary coastal indicator
 
 # 3. Age-based features
-df['House_Age_Group'] = pd.cut(df['HouseAge'], bins=[0, 10, 20, 30, 50], labels=[0, 1, 2, 3])
-df['House_Age_Group'] = df['House_Age_Group'].astype(int)
+df['House_Age_Group'] = pd.cut(df['HouseAge'], bins=[0, 10, 20, 30, 100], labels=[0, 1, 2, 3])
+df['House_Age_Group'] = df['House_Age_Group'].fillna(0).astype(int)
 
 # 4. Log transformations for skewed features
 df['Log_MedInc'] = np.log1p(df['MedInc'])
