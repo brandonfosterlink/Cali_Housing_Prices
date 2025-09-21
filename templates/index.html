@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>California Housing Price Predictor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 40px;
+        }
+
+        .form-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .form-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+            font-size: 1.1em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group small {
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .predict-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 20px;
+        }
+
+        .predict-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 152, 219, 0.3);
+        }
+
+        .predict-btn:active {
+            transform: translateY(0);
+        }
+
+        .predict-btn:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .results-section {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid #e9ecef;
+        }
+
+        .results-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            border-bottom: 3px solid #e74c3c;
+            padding-bottom: 10px;
+        }
+
+        .prediction-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #3498db;
+        }
+
+        .prediction-card h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .prediction-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .prediction-raw {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feature-explanation {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            border-left: 4px solid #95a5a6;
+        }
+
+        .feature-explanation h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .feature-explanation ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-explanation li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .feature-explanation li:before {
+            content: "🏠";
+            position: absolute;
+            left: 0;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .prediction-value {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏠 California Housing Price Predictor</h1>
+            <p>Predict house prices using advanced Support Vector Machine models</p>
+        </div>
+
+        <div class="content">
+            <div class="form-section">
+                <h2>📊 Input House Features</h2>
+                <form id="predictionForm">
+                    <div class="form-group">
+                        <label for="MedInc">Median Income (in $10,000s)</label>
+                        <input type="number" id="MedInc" name="MedInc" step="0.1" min="0" max="20" placeholder="e.g., 3.5" required>
+                        <small>Median income in the block group</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="HouseAge">House Age (years)</label>
+                        <input type="number" id="HouseAge" name="HouseAge" min="0" max="100" placeholder="e.g., 25" required>
+                        <small>Median house age in the block group</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="AveRooms">Average Rooms</label>
+                        <input type="number" id="AveRooms" name="AveRooms" step="0.1" min="0" max="20" placeholder="e.g., 6.5" required>
+                        <small>Average number of rooms per household</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="AveBedrms">Average Bedrooms</label>
+                        <input type="number" id="AveBedrms" name="AveBedrms" step="0.1" min="0" max="10" placeholder="e.g., 1.2" required>
+                        <small>Average number of bedrooms per household</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Population">Population</label>
+                        <input type="number" id="Population" name="Population" min="0" max="50000" placeholder="e.g., 2500" required>
+                        <small>Population in the block group</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="AveOccup">Average Occupancy</label>
+                        <input type="number" id="AveOccup" name="AveOccup" step="0.1" min="0" max="20" placeholder="e.g., 3.2" required>
+                        <small>Average number of household members</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Latitude">Latitude</label>
+                        <input type="number" id="Latitude" name="Latitude" step="0.01" min="32" max="42" placeholder="e.g., 34.05" required>
+                        <small>Latitude coordinate of the block group</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Longitude">Longitude</label>
+                        <input type="number" id="Longitude" name="Longitude" step="0.01" min="-125" max="-114" placeholder="e.g., -118.25" required>
+                        <small>Longitude coordinate of the block group</small>
+                    </div>
+
+                    <!-- Additional meaningful features -->
+                    <div class="form-group">
+                        <label for="Distance_to_Coast">Distance to Coast (miles)</label>
+                        <input type="number" id="Distance_to_Coast" name="Distance_to_Coast" step="0.1" min="0" max="100" placeholder="e.g., 5.2">
+                        <small>Approximate distance to the nearest coastline</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Crime_Rate">Crime Rate (per 1000 residents)</label>
+                        <input type="number" id="Crime_Rate" name="Crime_Rate" step="0.1" min="0" max="100" placeholder="e.g., 15.3">
+                        <small>Annual crime incidents per 1000 residents</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="School_Rating">School Rating (1-10)</label>
+                        <input type="number" id="School_Rating" name="School_Rating" min="1" max="10" placeholder="e.g., 8">
+                        <small>Average school district rating</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="Property_Tax_Rate">Property Tax Rate (%)</label>
+                        <input type="number" id="Property_Tax_Rate" name="Property_Tax_Rate" step="0.01" min="0" max="5" placeholder="e.g., 1.25">
+                        <small>Annual property tax rate as percentage</small>
+                    </div>
+
+                    <button type="submit" class="predict-btn" id="predictBtn">
+                        🔮 Predict House Price
+                    </button>
+                </form>
+
+                <div class="feature-explanation">
+                    <h3>📋 Feature Descriptions</h3>
+                    <ul>
+                        <li><strong>MedInc:</strong> Median income in the block group (in $10,000s)</li>
+                        <li><strong>HouseAge:</strong> Median house age in the block group (years)</li>
+                        <li><strong>AveRooms:</strong> Average number of rooms per household</li>
+                        <li><strong>AveBedrms:</strong> Average number of bedrooms per household</li>
+                        <li><strong>Population:</strong> Population in the block group</li>
+                        <li><strong>AveOccup:</strong> Average number of household members</li>
+                        <li><strong>Latitude:</strong> Latitude coordinate (32-42°N)</li>
+                        <li><strong>Longitude:</strong> Longitude coordinate (-125 to -114°W)</li>
+                        <li><strong>Distance to Coast:</strong> Miles to nearest coastline</li>
+                        <li><strong>Crime Rate:</strong> Annual crimes per 1000 residents</li>
+                        <li><strong>School Rating:</strong> School district quality (1-10)</li>
+                        <li><strong>Property Tax Rate:</strong> Annual tax rate as percentage</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h2>🎯 Prediction Results</h2>
+                <div id="results">
+                    <div class="loading">
+                        <p>👆 Enter house features and click "Predict House Price" to see predictions</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('predictionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const predictBtn = document.getElementById('predictBtn');
+            const resultsDiv = document.getElementById('results');
+            
+            // Show loading state
+            predictBtn.disabled = true;
+            predictBtn.textContent = '🔄 Predicting...';
+            
+            resultsDiv.innerHTML = '<div class="loading"><p>🔄 Making predictions...</p></div>';
+            
+            try {
+                // Get form data
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData.entries());
+                
+                // Make prediction request
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Display predictions
+                    let html = '<h3>🏡 Predicted House Values</h3>';
+                    
+                    if (result.predictions.enhanced) {
+                        html += `
+                            <div class="prediction-card">
+                                <h3>🎯 Enhanced Features Model (R² = 0.75)</h3>
+                                <div class="prediction-value">${result.predictions.enhanced.formatted}</div>
+                                <div class="prediction-raw">Raw value: ${result.predictions.enhanced.value}</div>
+                                <small>Uses 12 meaningful features including distance to coast, crime rate, school rating, and property taxes</small>
+                            </div>
+                        `;
+                    }
+                    
+                    if (result.predictions.pytorch) {
+                        html += `
+                            <div class="prediction-card">
+                                <h3>🧠 PyTorch Linear SVM (Backup)</h3>
+                                <div class="prediction-value">${result.predictions.pytorch.formatted}</div>
+                                <div class="prediction-raw">Raw value: ${result.predictions.pytorch.value}</div>
+                                <small>Uses 8 basic California housing features</small>
+                            </div>
+                        `;
+                    }
+                    
+                    // Add input summary
+                    html += `
+                        <div class="prediction-card">
+                            <h3>📊 Input Summary</h3>
+                            <p><strong>Median Income:</strong> $${(result.input_features.MedInc * 10000).toLocaleString()}</p>
+                            <p><strong>House Age:</strong> ${result.input_features.HouseAge} years</p>
+                            <p><strong>Average Rooms:</strong> ${result.input_features.AveRooms}</p>
+                            <p><strong>Average Bedrooms:</strong> ${result.input_features.AveBedrms}</p>
+                            <p><strong>Population:</strong> ${result.input_features.Population.toLocaleString()}</p>
+                            <p><strong>Average Occupancy:</strong> ${result.input_features.AveOccup}</p>
+                            <p><strong>Location:</strong> ${result.input_features.Latitude.toFixed(3)}°N, ${result.input_features.Longitude.toFixed(3)}°W</p>
+                            <p><strong>Distance to Coast:</strong> ${result.input_features.Distance_to_Coast} miles</p>
+                            <p><strong>Crime Rate:</strong> ${result.input_features.Crime_Rate} per 1000 residents</p>
+                            <p><strong>School Rating:</strong> ${result.input_features.School_Rating}/10</p>
+                            <p><strong>Property Tax Rate:</strong> ${result.input_features.Property_Tax_Rate}%</p>
+                        </div>
+                    `;
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `<div class="error">❌ ${result.error}</div>`;
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">❌ Network error: ${error.message}</div>`;
+            } finally {
+                // Reset button
+                predictBtn.disabled = false;
+                predictBtn.textContent = '🔮 Predict House Price';
+            }
+        });
+
+        // Add some default values for testing
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set some reasonable default values
+            document.getElementById('MedInc').value = '3.5';
+            document.getElementById('HouseAge').value = '25';
+            document.getElementById('AveRooms').value = '6.5';
+            document.getElementById('AveBedrms').value = '1.2';
+            document.getElementById('Population').value = '2500';
+            document.getElementById('AveOccup').value = '3.2';
+            document.getElementById('Latitude').value = '34.05';
+            document.getElementById('Longitude').value = '-118.25';
+            
+            // Set default values for new features
+            document.getElementById('Distance_to_Coast').value = '5.2';
+            document.getElementById('Crime_Rate').value = '15.3';
+            document.getElementById('School_Rating').value = '8';
+            document.getElementById('Property_Tax_Rate').value = '1.25';
+        });
+    </script>
+</body>
+</html>
